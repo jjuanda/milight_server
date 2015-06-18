@@ -30,6 +30,16 @@ def all_white():
     ml.setwhite()
     return jsonify({'response' : 'ok'})
 
+@app.route("/all/white/brightness/<int:val>")
+def all_white_brightness(val):
+    ml.setwhite()
+    ml.setbrightness(val)
+    return jsonify({'response' : 'ok'})
+
+@app.route("/all/white/transition/<int:time>/brightness/<int:brightness>")
+def all_white_transition(time, brightness):
+    ml.whitetransition(brightness, time)
+    return jsonify({'response' : 'ok'})
 
 @app.route("/all/brightness/<int:val>")
 def all_brightness(val):
@@ -41,6 +51,11 @@ def all_color(val):
     ml.setcolor(val)
     return jsonify({'response' : 'ok'})
 
+@app.route("/all/color/<int:color>/brightness/<int:brightness>")
+def all_color_brightness(color, brightness):
+    ml.setcolor(color)
+    ml.setbrightness(brightness)
+    return jsonify({'response' : 'ok'})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0")
