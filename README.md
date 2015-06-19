@@ -5,7 +5,8 @@ This is a simple REST API server (Web interface to come soon) to control Milight
 
     $ git clone https://github.com/jjuanda/milight_server.git
     $ cd milight_server
-    $ python server.py
+    $ pip3 install -r requirements.txt
+    $ python3 server.py
     $ # Enjoy responsibly!
 
 TODO:
