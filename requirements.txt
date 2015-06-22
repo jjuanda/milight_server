@@ -1,3 +1,3 @@
-Iflask
+flask
 flask-cors
 apscheduler
