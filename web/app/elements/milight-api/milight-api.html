@@ -1,0 +1,98 @@
+
+
+<dom-module id="milight-api">
+  <template>
+    <iron-ajax
+        id="settingsSender"
+        handle-as="json"
+        debounce-duration="300"
+        method="POST"></iron-ajax>
+    <iron-ajax>
+  </template>
+
+
+  <script>
+    (function() {
+      Polymer({
+        is: 'milight-api',
+
+        properties: {
+          bridgeIp: {
+            type: String,
+            value: ''
+            // notify: true
+          },
+          baseUrl: {
+            type: String,
+            value: ''
+            // notify: true
+          }
+        },
+
+        observers: [
+          '_bridgeIPChanged(bridgeIp)',
+          '_baseURLChanged(baseUrl)'
+        ],
+
+        APIBaseUrl: '',
+
+        _isSetup: function() {
+          return (typeof this.APIBaseUrl !== 'undefined' &&
+                         this.APIBaseUrl !== '' &&
+                  typeof this.bridgeIp   !== 'undefined' &&
+                         this.bridgeIp   !== '');
+        },
+
+        _bridgeIPChanged: function() {
+          if (this._isSetup())
+          {
+            console.log('Trying to change bridgeIp: ' + this.APIBaseUrl + ', ' + this.bridgeIp);
+            this.$.settingsSender.url = this.APIBaseUrl + '/ip/' + this.bridgeIp;
+            this.$.settingsSender.generateRequest();
+          }
+        },
+
+        _baseURLChanged: function() {
+
+          this.APIBaseUrl = this.baseUrl + '/api';
+          console.log('Trying to change baseUrl: ' + this.APIBaseUrl);
+          this._bridgeIPChanged();
+        },
+
+        updateOptions: function() {
+          this._bridgeIPChanged();
+        },
+
+        setAllLights: function(status) {
+          if (this._isSetup()) {
+            var verb = status ? 'on' : 'off';
+            this.$.settingsSender.url = this.APIBaseUrl + '/all/' + verb;
+            this.$.settingsSender.generateRequest();
+          }
+        },
+
+        setAllBrightness: function(brightness) {
+          if (this._isSetup()) {
+            this.$.settingsSender.url = this.APIBaseUrl + '/all/brightness/' + brightness;
+            this.$.settingsSender.generateRequest();
+          }
+        },
+
+        setAllColor: function(color) {
+          if (this._isSetup()) {
+            this.$.settingsSender.url = this.APIBaseUrl + '/all/color/' + color;
+            this.$.settingsSender.generateRequest();
+          }
+        },
+
+        setAllHue: function(hue) {
+          if (this._isSetup()) {
+            this.$.settingsSender.url = this.APIBaseUrl + '/all/hue/' + hue;
+            this.$.settingsSender.generateRequest();
+          }
+        }
+
+      });
+    })();
+  </script>
+</dom-module>

@@ -1,0 +1,18 @@
+
+<script>
+  (function() {
+    Polymer({
+      is: 'get-base-address',
+
+      properties: {
+        baseUrl: {
+          type: String,
+          notify: true
+        }
+      },
+      ready: function() {
+        this.baseUrl = window.location.origin;
+      }
+    });
+  })();
+</script>
