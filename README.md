@@ -9,6 +9,8 @@ This is a simple REST API server (Web interface to come soon) to control Milight
     $ python3 server.py
     $ # Enjoy responsibly!
 
+The REST verbs are not that rest, though, but I am making it easier for automation apps on Android to interoperate with this API.
+
 TODO:
 - Document commands
 - Make the bridge IP configurable

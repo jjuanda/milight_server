@@ -2,6 +2,9 @@ import time
 import sys
 import socket
 from datetime import datetime
+import re
+import struct
+import colorsys
 
 
 UDP_IP = "255.255.255.255" #this is the IP of the wifi bridge, or 255.255.255.255 for UDP broadcast
@@ -16,15 +19,23 @@ print ("UDP target port:", UDP_PORT) #don't really need this
 
 class Milight:
     def __init__(self, ip = "192.168.1.2", port = 8899):
-        self.ip = ip
-        self.port = port
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.mode = None
-        self.color = None
+        self.ip         = ip
+        self.port       = port
+        self.sock       = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.mode       = None
+        self.color      = None
         self.brightness = None
-        self.cmddelay = .1
-        self.frac_secs = 8
-        self.frac_step = 1./self.frac_secs
+        self.cmddelay   = .1
+        self.frac_secs  = 8
+        self.frac_step  = 1./self.frac_secs
+
+    def set_ip(self, ip):
+        aa = re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", ip)
+        if aa:
+            print("Setting Bridge IP to %s" % ip)
+            self.ip = ip
+        else:
+            raise ValueError("Invalid IP address: %s" % ip)
 
     def send(self, msg):
         self.sock.sendto(msg, (self.ip, self.port))
@@ -35,31 +46,56 @@ class Milight:
     def on(self):
         self.send(bytes([66, 0, 85]))
 
-    def setbrightness(self, brightness):
-        self.send(bytes([66, 0, 85]))
-        self.brightness = brightness
-        self.send(bytes([78, brightness, 85]))
+    def set_brightness(self, brightness):
+        if brightness == 0:
+            self.brightness = 0
+            self.off()
+        else:
+            if self.brightness == 0:
+                self.on()
+            self.send(bytes([66, 0, 85]))
+            self.brightness = brightness
+            self.send(bytes([78, brightness, 85]))
 
-    def setcolor(self, color):
-        self.send(bytes([66, 0, 85]))
-        self.color = color
-        self.mode = "rgb"
-        self.send(bytes([64, color, 85]))
+    def _hex_to_rgb_color(self, hex_color):
+        res = struct.unpack('BBB', hex_color)
+        print("hex > int: %s > %s" % (hex_color, res))
+        return res
+
+    def _rgb_to_milight_color(self, rgb):
+        return int(255.*(1.-colorsys.rgb_to_hls(rgb[0], rgb[1], rgb[2])[0]) + 192) % 255
+
+    def _hex_to_milight_color(self, hex_color):
+        return self._rgb_to_milight_color (self._hex_to_rgb_color(hex_color))
+
+    def set_hex_color(self, hex_color):
+        color = self._hex_to_milight_color(bytearray.fromhex(hex_color))
+        self.set_color(color)
+
+    def set_color(self, hue):
+        self.on()
+
+        # hue = int(((270 - int(hue)) % 360) * 255 / 360)
+        hue = (256 + 176 - int(int(hue) / 360.0 * 255.0)) % 256
+        print("hue: %s" % hue)
+        self.color = hue
+        self.mode  = "rgb"
+        self.send(bytes([64, hue, 85]))
 
     def colorbrightness(self, color, brightness):
-        self.setcolor(color)
+        self.set_color(color)
         time.sleep(self.cmddelay)
-        self.setbrightness(brightness)
+        self.brightness(brightness)
 
-    def setwhite(self):
+    def white(self):
         self.send(bytes([66, 0, 85]))
         self.send(bytes([194, 0, 85]))
         self.mode = "white"
 
     def whitebrightness(self, brightness):
-        self.setwhite()
+        self.white()
         time.sleep(self.cmddelay)
-        self.setbrightness(brightness)
+        self.set_brightness(brightness)
 
     def nightmode(self):
         self.send(b'\x41\x00\xC1')
