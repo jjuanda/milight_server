@@ -101,9 +101,12 @@ def proxy(url):
 
             apsched = BackgroundScheduler()
             apsched.start()
+
             print("Scheduling alarm for %s (%ss from now)" % (dtalarm, timediff.seconds))
             apsched.add_job(do_alarm, 'date', run_date=dtalarm, id='wakeup')
             apsched.print_jobs()
+            ml.whitetransition(2, 5)
+            ml.off()
             return "Scheduled for %s" % time
 
 

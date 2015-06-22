@@ -61,7 +61,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   app.updateBrightness = function() {
     console.log('updateBrightness: ' + this.lightsBrightness);
-    if (this.lightsBrightness == 0) {
+    if (this.lightsBrightness === 0) {
       this.lightsOn = false;
     } else {
       this.lightsOn = true;
@@ -74,8 +74,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     this.$.api.setAllColor(event.detail.hex.substr(1));
   };
 
-  app.updateHue = function(hue) {
+  app.updateWhite = function() {
+    console.log('updateWhite: ' + this.lightsWhite);
+    this.$.api.setAllColor(event.detail.hex.substr(1));
+  };
+
+  app.updateHue = function() {
     console.log('updateHue: ' + this.lightsHue);
     this.$.api.setAllHue(this.lightsHue);
+  };
+
+  app.setAlarm = function() {
+    console.log('setAlarm: ' + this.lightsAlarm);
+    this.$.api.setAllAlarm(this.lightsAlarm);
   };
 })(document);

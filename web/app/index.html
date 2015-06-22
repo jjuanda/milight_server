@@ -111,6 +111,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <p class="paper-font-body2">
                   <h3>All lights</h3>
                   <p>
+                    <paper-input
+                      id="alarmAll"
+                      label="Alarm time (HHMM)"
+                      required
+                      value="{{lightsAlarm}}">
+                    </paper-input>
+                    <paper-button
+                      raised
+                      class="colorful"
+                      on-click="setAlarm">
+                        Set
+                    </paper-button>
+                  </p>
+                  <p>
+                    <paper-checkbox
+                      id="colorAll"
+                      checked="{{lightsWhite}}"
+                      on-change="updateWhite">Color
+                    </paper-checkbox>
+                  </p>
+                  <p>
                   <paper-toggle-button
                     id="toggleAll"
                     checked="{{lightsOn}}"

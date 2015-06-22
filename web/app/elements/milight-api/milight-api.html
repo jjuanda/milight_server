@@ -90,6 +90,13 @@
             this.$.settingsSender.url = this.APIBaseUrl + '/all/hue/' + hue;
             this.$.settingsSender.generateRequest();
           }
+        },
+
+        setAllAlarm: function(time) {
+          if (this._isSetup()) {
+            this.$.settingsSender.url = this.APIBaseUrl + '/alarm/' + time;
+            this.$.settingsSender.generateRequest();
+          }
         }
 
       });
