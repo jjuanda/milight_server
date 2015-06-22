@@ -41,10 +41,10 @@ class Milight:
         self.sock.sendto(msg, (self.ip, self.port))
 
     def off(self):
-        self.send(bytes([65, 0, 85]))
+        self._send_commands(([65, 0], ))
 
     def on(self):
-        self.send(bytes([66, 0, 85]))
+        self._send_commands(([66, 0], ))
 
     def set_brightness(self, brightness):
         if brightness == 0:
@@ -53,9 +53,8 @@ class Milight:
         else:
             if self.brightness == 0:
                 self.on()
-            self.send(bytes([66, 0, 85]))
+            self._send_commands(([66, 0], [78, brightness]))
             self.brightness = brightness
-            self.send(bytes([78, brightness, 85]))
 
     def _hex_to_rgb_color(self, hex_color):
         res = struct.unpack('BBB', hex_color)
@@ -67,6 +66,11 @@ class Milight:
 
     def _hex_to_milight_color(self, hex_color):
         return self._rgb_to_milight_color (self._hex_to_rgb_color(hex_color))
+
+    def _send_commands(self, cmds):
+        for cmd in cmds:
+            self.send(bytes([cmd[0], cmd[1], 85]))
+            time.sleep(self.cmddelay)
 
     def set_hex_color(self, hex_color):
         color = self._hex_to_milight_color(bytearray.fromhex(hex_color))
@@ -80,25 +84,28 @@ class Milight:
         print("hue: %s" % hue)
         self.color = hue
         self.mode  = "rgb"
-        self.send(bytes([64, hue, 85]))
+        self._send_commands(([64, hue], ))
 
     def colorbrightness(self, color, brightness):
         self.set_color(color)
         time.sleep(self.cmddelay)
         self.brightness(brightness)
 
-    def white(self):
-        self.send(bytes([66, 0, 85]))
-        self.send(bytes([194, 0, 85]))
+    def nightmode(self):
+        self._send_commands(([65, 0], [193, 0]))
+        self.mode = "nightmode"
+
+    def discomode(self):
+        self._send_commands(([77, 0], ))
+        self.mode = "discomode"
+
+    def set_white(self):
+        self._send_commands(([66, 0], [194, 0]))
         self.mode = "white"
 
     def whitebrightness(self, brightness):
-        self.white()
-        time.sleep(self.cmddelay)
+        self.set_white()
         self.set_brightness(brightness)
-
-    def nightmode(self):
-        self.send(b'\x41\x00\xC1')
 
     def colortransition(self, to, transitiontime):
         from_color = self.color
@@ -121,7 +128,10 @@ class Milight:
             time.sleep(self.frac_step)
 
     def whitetransition(self, to_brightness, transitiontime):
-        from_brightness = self.brightness
+
+        from_brightness = self.brightness if self.brightness is not None else 2
+        to_brightness = int(to_brightness)
+        print("White transition from %s to %s in %s secs" % (from_brightness, to_brightness, transitiontime))
 
         num_steps = transitiontime*self.frac_secs # Each 250ms
 

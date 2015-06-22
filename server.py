@@ -1,11 +1,11 @@
 
 import time
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import Flask, send_from_directory, jsonify, Response
 from flask.ext.cors import CORS
-
+from apscheduler.schedulers.background import BackgroundScheduler
 import requests
 
 from MiLight import *
@@ -16,8 +16,10 @@ CORS(app, resources=r'/api/*', allow_headers='Content-Type')
 
 ml = Milight()
 
-DEBUG_WEB = True
+DEBUG_WEB = False
 WEB_SERVER = 'http://localhost:3000/'
+
+
 
 def serve_web(url):
     if url == "":
@@ -31,6 +33,13 @@ def serve_web(url):
     else:
         print("web/dist%s" % url)
         return send_from_directory('web/dist', url)
+
+def do_alarm():
+    with app.app_context():
+        print("Alarm at %s" % datetime.now())
+        ml.whitetransition(25, 60)
+        
+        # Do whatever you were doing to check the second API
 
 @app.route("/")
 def index():
@@ -52,8 +61,16 @@ def proxy(url):
             elif elem2 == 'off':
                 ml.off()
 
+
+
             elif elem2 == 'white':
-                ml.setwhite()
+                ml.set_white()
+
+            elif elem2 == 'nightmode':
+                ml.nightmode()
+
+            elif elem2 == 'discomode':
+                ml.discomode()
 
             elif elem2 == 'brightness':
                 print(elems)
@@ -70,7 +87,26 @@ def proxy(url):
                     time = elems[4]
                     brightness = elems[5]
                     ml.whitetransition(brightness, time)
+
             return "ok"
+        elif elems1 == 'alarm':
+            time           = elems[2]
+            dtalarm        = datetime.now()
+            dtalarm = dtalarm.replace(hour = int(time[0:2]), minute = int(time[2:4]), second=0)
+
+            if dtalarm < datetime.now():
+                dtalarm += timedelta(days=1)
+
+            timediff = dtalarm - datetime.now()
+
+            apsched = BackgroundScheduler()
+            apsched.start()
+            print("Scheduling alarm for %s (%ss from now)" % (dtalarm, timediff.seconds))
+            apsched.add_job(do_alarm, 'date', run_date=dtalarm, id='wakeup')
+            apsched.print_jobs()
+            return "Scheduled for %s" % time
+
+
         elif elems1 == 'ip':
             ml.set_ip(elems[2])
             return "ok"
