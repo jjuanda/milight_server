@@ -1,4 +1,5 @@
 flask
 flask-cors
+https://github.com/Hardtack/Flask-aiohttp/archive/master.zip
 apscheduler
 requests

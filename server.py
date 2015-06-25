@@ -5,14 +5,15 @@ from datetime import datetime, timedelta
 
 from flask import Flask, send_from_directory, jsonify, Response
 from flask.ext.cors import CORS
+from flask.ext.aiohttp import AioHTTP
 from apscheduler.schedulers.background import BackgroundScheduler
 import requests
 
 from MiLight import *
 
 app = Flask(__name__)
-CORS(app, resources=r'/api/*', allow_headers='Content-Type')
-
+#CORS(aio, resources=r'/api/*', allow_headers='Content-Type')
+aio = AioHTTP(app)
 
 ml = Milight()
 
@@ -27,11 +28,9 @@ def serve_web(url):
 
     if DEBUG_WEB:
         url = WEB_SERVER + url
-        print(url)
         res = requests.get(url)
         return Response(res.content, res.headers['Content-Type'])
     else:
-        print("web/dist%s" % url)
         return send_from_directory('web/dist', url)
 
 def do_alarm():
@@ -121,4 +120,4 @@ def proxy(url):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0")
+    aio.run(app, debug=True, host="0.0.0.0")
