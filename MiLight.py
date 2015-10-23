@@ -46,6 +46,14 @@ class Milight:
     def on(self):
         self._send_commands(([66, 0], ))
 
+    def group_on(self, group):
+        cmd = 69 + (int(group) - 1) * 2
+        self._send_commands(([cmd, 0], ))
+
+    def group_off(self, group):
+        cmd = 70 + (int(group) - 1) * 2
+        self._send_commands(([cmd, 0], ))
+
     def set_brightness(self, brightness):
         if brightness == 0:
             self.brightness = 0

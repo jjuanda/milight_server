@@ -60,8 +60,6 @@ def proxy(url):
             elif elem2 == 'off':
                 ml.off()
 
-
-
             elif elem2 == 'white':
                 ml.set_white()
 
@@ -88,6 +86,16 @@ def proxy(url):
                     ml.whitetransition(brightness, time)
 
             return "ok"
+        elif elems1 == 'group1':
+            elem2 = elems[2]
+            if elem2 == 'on':
+                ml.group_on(1)
+
+            elif elem2 == 'off':
+                ml.group_on(2)
+
+            return "ok"
+
         elif elems1 == 'alarm':
             time           = elems[2]
             dtalarm        = datetime.now()
